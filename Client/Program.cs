@@ -19,6 +19,18 @@ namespace Fork
             {
                 using (var client = await ConnectClient())
                 {
+                    Console.WriteLine(@"
+                    
+  _    _                                         
+ | |  | |                                        
+ | |__| | __ _ _ __   __ _ _ __ ___   __ _ _ __  
+ |  __  |/ _` | '_ \ / _` | '_ ` _ \ / _` | '_ \ 
+ | |  | | (_| | | | | (_| | | | | | | (_| | | | |
+ |_|  |_|\__,_|_| |_|\__, |_| |_| |_|\__,_|_| |_|
+                      __/ |                      
+                     |___/                       
+
+                    ");
                     await DoClientWork(client);
                     Console.ReadKey();
                 }
@@ -62,7 +74,6 @@ namespace Fork
             while (!gameFound) 
             {
                 friend = client.GetGrain<IFork>(i);
-                Console.WriteLine($"Grain number {i} \n");
                 bool hasPlayerInGame = await friend.HasPlayer();
                 if (hasPlayerInGame) 
                 {
@@ -70,6 +81,7 @@ namespace Fork
                 }
                 else 
                 {
+                    Console.WriteLine($"Connected on Room #{i} \n");
                     gameFound = true;
                 }
             }
@@ -78,30 +90,34 @@ namespace Fork
 
         private static async Task DoClientWork(IClusterClient client)
         {
-            // example of calling grains from the initialized client
             var friend = await GetEmptyGame(client);
             var player = client.GetGrain<IPlayer>(Guid.NewGuid());
             await player.SetForkGame(friend);
-            var response = await friend.SayHello("Good morning, HelloGrain!");
-            Console.WriteLine($"\n\n{response}\n\n");
-
-            Console.WriteLine("Do you want to play? What's your name?");
-            string name = Console.ReadLine();
-
+            //var response = await friend.SayHello("Good morning, HelloGrain!");
             
+            Console.WriteLine("Welcome to the Hangman game, your goal is to find out which Game is hidden behind the _!");
+            Console.WriteLine("Do you want to play? What's your name?");
+            
+            
+            string name = Console.ReadLine();
+            while (name == "") 
+            {
+                Console.WriteLine("unfortunately you can't play anonymous, please type your name");
+                name = Console.ReadLine();
+            }
             player.SetName(name).Wait();
 
             name = player.Name().Result;
             Console.WriteLine($"Greetings {name}, nice to meet you");
 
-            response = await player.GetCurrentWord();
+            var response = await player.GetCurrentWord();
             Console.WriteLine($"\n\n{response}\n\n");
 
             bool isGameOver = false;
             bool playerDead = await player.IsPlayerDead();
             while (!isGameOver && !playerDead) 
             {
-                Console.WriteLine("Type the letter to find the word: ");
+                Console.WriteLine("Type a letter to find the word: ");
                 string letterString = Console.ReadLine();
                 if (letterString.Length > 1) 
                 {
