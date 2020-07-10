@@ -7,7 +7,7 @@ namespace Fork
         Task<string> SayHello(string greeting);
 
         Task<string> SelectWord();
-        Task<string> HasLetter(char letter);
+        Task<bool> HasLetter(char letter);
         Task<string> TheWord();
         Task<bool> IsWordFound();
 

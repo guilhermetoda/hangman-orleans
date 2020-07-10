@@ -10,6 +10,10 @@ namespace Fork
 
         public IFork currentGame; // Current word
 
+        private int lives;
+        private const int NUMBER_OF_LIVES = 5;
+        private bool dead = false;
+
         public override Task OnActivateAsync()
         {
             this.player = new Player { Key = this.GetPrimaryKey(), Name = "nobody" };
@@ -19,10 +23,16 @@ namespace Fork
         Task IPlayer.SetForkGame(IFork game)
         {
             this.currentGame = game;
+            lives = NUMBER_OF_LIVES;
             game.Start(player);
             game.SelectWord();
             return Task.CompletedTask; 
 
+        }
+
+        Task<int> IPlayer.GetLives() 
+        {
+            return Task.FromResult(lives);
         }
 
         Task<string> IPlayer.Name() 
@@ -57,10 +67,30 @@ namespace Fork
             return currentGame.TheWord();
         }
 
-        Task<bool> IPlayer.CheckLetter(char letter) 
+        Task<bool> CheckAlive() 
         {
-            currentGame.HasLetter(letter);
-            return currentGame.IsWordFound();
+            if (lives == 0) 
+            {
+                return Task.FromResult(true);
+            }
+            return Task.FromResult(false);
+        }
+
+        Task<bool> IPlayer.IsPlayerDead() 
+        {
+            return Task.FromResult(dead);
+        }
+
+        async Task<bool> IPlayer.CheckLetter(char letter) 
+        {
+            bool hasLetter = await currentGame.HasLetter(letter);
+            if (!hasLetter)
+            {
+                lives -= 1;
+                dead = await this.CheckAlive();
+            }
+            bool isWordFound = await currentGame.IsWordFound();
+            return isWordFound;
         }
 
         Task IPlayer.ExitGame() 

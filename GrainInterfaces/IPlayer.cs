@@ -19,6 +19,9 @@ namespace Fork
 
         Task ExitGame();
 
+        Task<int> GetLives();
+        Task<bool> IsPlayerDead();
+
         
     }
 }

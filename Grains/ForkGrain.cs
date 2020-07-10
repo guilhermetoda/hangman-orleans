@@ -29,6 +29,7 @@ namespace Fork
 
         Task<bool> IFork.HasPlayer() 
         {
+            logger.LogInformation("Checking if has player in the game");
             return Task.FromResult(playerConnected != null);
         }
 
@@ -63,17 +64,19 @@ namespace Fork
 
         }
 
-        Task<string> IFork.HasLetter(char letter) 
+        Task<bool> IFork.HasLetter(char letter) 
         {
             int i;
             letter = char.ToUpper(letter);
             char[] theWordChar = theWord.ToCharArray();
             bool needsLetter = false;
+            bool hasTheLetter = false;
             for (i = 0; i < words[wordIndex].Length; ++i) 
             {
                 if (words[wordIndex][i] == letter) 
                 {
                     theWordChar[i] = letter;
+                    hasTheLetter = true;
                 }
 
                 if (theWordChar[i] == '_') 
@@ -84,7 +87,7 @@ namespace Fork
             foundWord = !needsLetter;
             theWord = new string(theWordChar);
             logger.LogInformation($"\n Checking word: {words[wordIndex]} - {theWord}");
-            return Task.FromResult(theWord);
+            return Task.FromResult(hasTheLetter);
         }
 
         Task<string> IFork.TheWord() 
