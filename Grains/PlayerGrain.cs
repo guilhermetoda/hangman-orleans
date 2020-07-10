@@ -54,6 +54,10 @@ namespace Fork
         Task IPlayer.IncrementPoints(int newPoints) 
         {
             this.player.Points += newPoints;
+            if (this.player.Points < 0) 
+            {
+                this.player.Points = 0;
+            }
             return Task.CompletedTask;
         }
 
@@ -95,6 +99,7 @@ namespace Fork
 
         Task IPlayer.ExitGame() 
         {
+            EventHub.SendMessage(player).Wait();
             currentGame.RemovePlayerFromGame();
             return Task.CompletedTask;
         }

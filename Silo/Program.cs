@@ -35,6 +35,7 @@ namespace Fork
 
         private static async Task<ISiloHost> StartSilo()
         {
+            EventHub.ConnectToEventHub().Wait();
             // define the cluster configuration
             var builder = new SiloHostBuilder()
                 .UseLocalhostClustering()

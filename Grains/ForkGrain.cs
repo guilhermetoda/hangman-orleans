@@ -13,6 +13,7 @@ namespace Fork
         private bool foundWord = false;
 
         private Player playerConnected;
+        //private EventHub eventuHubConnection;
 
         Task IFork.Start(Player player) 
         {

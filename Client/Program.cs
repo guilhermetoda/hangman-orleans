@@ -133,10 +133,13 @@ namespace Fork
 
             if (playerDead) 
             {
+                //Incrementing Points here for now, remove it later
+                player.IncrementPoints(-10).Wait();
                 Console.WriteLine("\n You DIED! Try again next time");    
             }
             else 
             {
+                player.IncrementPoints(10).Wait();
                 Console.WriteLine("\n Great Job! Congratulations!! You Win the Game!");
             }
             await player.ExitGame();
