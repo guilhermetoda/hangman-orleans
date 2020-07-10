@@ -62,6 +62,7 @@ namespace Fork
             while (!gameFound) 
             {
                 friend = client.GetGrain<IFork>(i);
+                Console.WriteLine($"Grain number {i} \n");
                 bool hasPlayerInGame = await friend.HasPlayer();
                 if (hasPlayerInGame) 
                 {
@@ -79,25 +80,26 @@ namespace Fork
         {
             // example of calling grains from the initialized client
             var friend = await GetEmptyGame(client);
+            var player = client.GetGrain<IPlayer>(Guid.NewGuid());
+            await player.SetForkGame(friend);
             var response = await friend.SayHello("Good morning, HelloGrain!");
             Console.WriteLine($"\n\n{response}\n\n");
 
             Console.WriteLine("Do you want to play? What's your name?");
             string name = Console.ReadLine();
 
-            var player = client.GetGrain<IPlayer>(Guid.NewGuid());
+            
             player.SetName(name).Wait();
 
             name = player.Name().Result;
             Console.WriteLine($"Greetings {name}, nice to meet you");
 
-            await player.SetForkGame(friend);
-
             response = await player.GetCurrentWord();
             Console.WriteLine($"\n\n{response}\n\n");
 
             bool isGameOver = false;
-            while (!isGameOver) 
+            bool playerDead = await player.IsPlayerDead();
+            while (!isGameOver && !playerDead) 
             {
                 Console.WriteLine("Type the letter to find the word: ");
                 string letterString = Console.ReadLine();
@@ -110,10 +112,18 @@ namespace Fork
                 isGameOver = await player.CheckLetter(letter);
                 response = await player.GetCurrentWord();
                 Console.WriteLine($"The Word is: {response}|");
+                playerDead = await player.IsPlayerDead();
             }
 
-            Console.WriteLine("\n Great Job! Congratulations!! You Win the Game!");
-            player.ExitGame();
+            if (playerDead) 
+            {
+                Console.WriteLine("\n You DIED! Try again next time");    
+            }
+            else 
+            {
+                Console.WriteLine("\n Great Job! Congratulations!! You Win the Game!");
+            }
+            await player.ExitGame();
         }
     }
 }
