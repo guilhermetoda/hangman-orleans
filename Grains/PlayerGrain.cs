@@ -17,7 +17,7 @@ namespace Fork
 
         public override Task OnActivateAsync()
         {
-            this.player = new Player { Key = this.GetPrimaryKey(), Name = "nobody" };
+            this.player = new Player { Key = this.GetPrimaryKey(), Name = "nobody", FoundTheWord = false, GamesGuessed = new List<int>()};
             return base.OnActivateAsync();
         }
 
@@ -32,14 +32,24 @@ namespace Fork
             return false;
         }
 
+        Task<List<int>> IPlayer.GetGamesGuessed() 
+        {
+            return Task.FromResult(player.GamesGuessed);
+        }
+
         Task IPlayer.SetForkGame(IFork game)
         {
             this.currentGame = game;
             lives = NUMBER_OF_LIVES;
             game.Start(player);
             game.SelectWord();
-            return Task.CompletedTask; 
+            return Task.CompletedTask;
+        }
 
+        Task IPlayer.SetWordIndex(int index) 
+        {
+            player.WordIndex = index;
+            return Task.CompletedTask;
         }
 
         Task<int> IPlayer.GetLives() 
@@ -55,21 +65,6 @@ namespace Fork
         Task IPlayer.SetName(string name)
         {
             this.player.Name = name;
-            return Task.CompletedTask;
-        }
-
-        Task<int> IPlayer.Points() 
-        {
-            return Task.FromResult(player.Points);
-        }
-
-        Task IPlayer.IncrementPoints(int newPoints) 
-        {
-            this.player.Points += newPoints;
-            if (this.player.Points < 0) 
-            {
-                this.player.Points = 0;
-            }
             return Task.CompletedTask;
         }
 
@@ -97,6 +92,16 @@ namespace Fork
             return Task.FromResult(dead);
         }
 
+        async Task<bool> CheckIfWordIsFound() 
+        {
+            if (await currentGame.IsWordFound()) 
+            {
+                player.FoundTheWord = true;
+                return true;
+            }
+            return false;
+        }
+
         async Task<bool> IPlayer.CheckLetter(char letter) 
         {
             bool hasLetter = await currentGame.HasLetter(letter);
@@ -105,8 +110,7 @@ namespace Fork
                 lives -= 1;
                 dead = await this.CheckAlive();
             }
-            bool isWordFound = await currentGame.IsWordFound();
-            return isWordFound;
+            return await CheckIfWordIsFound();
         }
 
         Task IPlayer.ExitGame() 

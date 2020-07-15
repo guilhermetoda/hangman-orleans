@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fork
@@ -7,10 +8,10 @@ namespace Fork
     public class ForkGrain : Orleans.Grain, IFork
     {
         private readonly ILogger logger; 
-        private string[] words = {"GEARS", "HALO", "ORI", "TOMB RAIDER", "FIFA", "SUPER MARIO WORLD", "ZELDA", "MEGA MAN", "LIFE OF PIGEON"};
+        private string[] words = {"GEARS", "HALO", "ORI AND THE BLIND FOREST", "TOMB RAIDER", "FIFA", "SUPER MARIO WORLD", "ZELDA", "MEGA MAN", "LIFE OF PIGEON", "MINECRAFT", "SUNSET OVERDRIVE", "METAL GEAR SOLID", "GTA", "NBA 2K", "SEA OF THIEVES"};
 
         private string theWord;
-        private int wordIndex;
+        public int wordIndex;
         private bool foundWord = false;
 
         private Player playerConnected;
@@ -47,11 +48,25 @@ namespace Fork
             return Task.FromResult($"\n Client said: '{greeting}', so HelloGrain says: Hello!");
         }
 
-        Task<string> IFork.SelectWord() 
+        Task<bool> IFork.SelectWord() 
         {
-            int randomNumber = random.Next(0, words.Length);
-            logger.LogInformation($"\n Trying to select the word");
-            wordIndex = randomNumber;
+            bool selected = false;
+            logger.LogInformation("Selecting Word...");
+            if (words.Length == playerConnected.GamesGuessed.Count) 
+            {
+                logger.LogInformation($"\nWord not selected");
+                return Task.FromResult(false);
+            }
+            logger.LogInformation("Before loop Loop");
+            while (!selected) 
+            {
+                logger.LogInformation("Selecting Loop");
+                int randomNumber = random.Next(0, words.Length);
+                wordIndex = randomNumber;
+                logger.LogInformation($"\n Trying to select the word {words[wordIndex]}");
+                selected = !IsWordPlayedBefore(wordIndex);
+            }
+            
             //Fill the word with -
             for (int i = 0; i < words[wordIndex].Length; ++i) 
             {
@@ -63,8 +78,21 @@ namespace Fork
                 theWord += '_';
             }
             logger.LogInformation($"\n The word is: {words[wordIndex]}");
-            return Task.FromResult(theWord); 
+            return Task.FromResult(true); 
 
+        }
+
+        private bool IsWordPlayedBefore(int index) 
+        {
+            for (int i = 0; i< playerConnected.GamesGuessed.Count; i++) 
+            {
+                if (index == playerConnected.GamesGuessed[i]) 
+                {
+                    return true;
+                }
+            }
+            return false;
+            
         }
 
         Task<bool> IFork.HasLetter(char letter) 
@@ -93,6 +121,11 @@ namespace Fork
             return Task.FromResult(hasTheLetter);
         }
 
+        Task<int> IFork.WordIndex() 
+        {
+            return Task.FromResult(wordIndex);
+        }
+
         Task<string> IFork.TheWord() 
         {
             return Task.FromResult(theWord);
@@ -108,6 +141,16 @@ namespace Fork
         {
             playerConnected = null;
             return Task.CompletedTask;
+        }
+
+        Task<string> IFork.WordsFound(List<int> indexList) 
+        {
+            string output = "";
+            for (int i = 0; i < indexList.Count; i++)  
+            {
+                output += words[indexList[i]]+ "  ";
+            }
+            return Task.FromResult(output);
         }
 
     }

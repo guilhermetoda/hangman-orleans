@@ -1,4 +1,5 @@
 using Orleans;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fork
@@ -8,11 +9,12 @@ namespace Fork
         Task SetForkGame(IFork game);
         Task<bool> GetUserFromDB(string playerName);
 
+        Task<List<int>> GetGamesGuessed();
+
         Task<string> Name();
         Task SetName(string name);
 
-        Task<int> Points();
-        Task IncrementPoints(int newPoints);
+        Task SetWordIndex(int index);
 
         Task<IFork> GetCurrentGame();
         Task<string> GetCurrentWord();

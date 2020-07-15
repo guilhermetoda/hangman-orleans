@@ -74,9 +74,14 @@ namespace Fork
                 playerResponse.Key = results[0].Key;
                 playerResponse.Name = results[0].Name;
                 playerResponse.FoundTheWord = false;
-                for (int i =0 ; i < results.Count; i++) 
+                playerResponse.GamesGuessed = new List<int>();
+                
+                for (int i = 0 ; i < results.Count; i++) 
                 {    
-                    playerResponse.GamesGuessed.Add(playerResponse.WordIndex);
+                    if (results[i].FoundTheWord) 
+                    {
+                        playerResponse.GamesGuessed.Add(results[i].WordIndex);
+                    }
                 }
                 return playerResponse;
             }

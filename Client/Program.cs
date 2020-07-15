@@ -102,17 +102,21 @@ namespace Fork
                 name = Console.ReadLine();
             }
 
-            
-
             var player = client.GetGrain<IPlayer>(Guid.NewGuid());
-            
+            Console.WriteLine("Checking if you had played before...");
             bool isRegistered = await player.GetUserFromDB(name);
             var friend = await GetEmptyGame(client);
-            await player.SetForkGame(friend);
+
+            player.SetForkGame(friend).Wait();
+            int wordIndex = await friend.WordIndex();
+            player.SetWordIndex(wordIndex).Wait();
+
 
             if (isRegistered) 
             {    
                 Console.WriteLine($"Hello again {name}, it's good to have you back");
+                string wordsFoundByPlayer = await friend.WordsFound(await player.GetGamesGuessed());
+                Console.WriteLine($"You have discovery this Games: {wordsFoundByPlayer}, Let's try to find more!");
             }
             else 
             {
@@ -146,12 +150,10 @@ namespace Fork
             if (playerDead) 
             {
                 //Incrementing Points here for now, remove it later
-                player.IncrementPoints(-10).Wait();
                 Console.WriteLine("\n You DIED! Try again next time");    
             }
             else 
             {
-                player.IncrementPoints(10).Wait();
                 Console.WriteLine("\n Great Job! Congratulations!! You Win the Game!");
             }
             await player.ExitGame();

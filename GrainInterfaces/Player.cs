@@ -1,5 +1,6 @@
 using Orleans.Concurrency;
 using System;
+using System.Collections.Generic;
 
 namespace Fork
 {
@@ -8,6 +9,9 @@ namespace Fork
     {
         public Guid Key { get; set; }
         public string Name { get; set; }
-        public int Points { get; set; }
+        // array to register how many games the player had complete
+        public List<int> GamesGuessed { get; set; }
+        public int WordIndex { get; set; }
+        public bool FoundTheWord { get; set; }
     }
 }
