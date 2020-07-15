@@ -13,8 +13,8 @@ namespace Fork
         private static readonly string cosmosDatabaseId = "outDatabase";
         private static readonly string containerId = "MyCollection";
 
-        private static readonly string endpoint = "https://raining-takos-sql.documents.azure.com:443/";
-        private static readonly string authKey = "D0DBk0uyXgRFkionUyJZzMXZN7l6fmyKyPmiUkuovEl1phdkPUztsE2AHtX0y33qLEA59WvXOdvP20IdTf2jbQ==";
+        private static readonly string endpoint = "";
+        private static readonly string authKey = "";
 
         private static Database cosmosDatabase = null;
         private static Container container;
@@ -60,19 +60,25 @@ namespace Fork
                     
                     FeedResponse<Player> response = await resultSetIterator.ReadNextAsync();
                     results.AddRange(response);
-                    Console.WriteLine(response.StatusCode);
                     if (response.Diagnostics != null)
                     {
                         Console.WriteLine($"\nQueryWithSqlParameters Diagnostics: {response.Diagnostics.ToString()}");
                     }
-                    Console.WriteLine(results);
                 }
 
                 //Assert("Expected only 1 family", results.Count == 1);
             }
             if (results.Count > 0) 
             {
-                return results[0];
+                Player playerResponse = new Player();
+                playerResponse.Key = results[0].Key;
+                playerResponse.Name = results[0].Name;
+                playerResponse.FoundTheWord = false;
+                for (int i =0 ; i < results.Count; i++) 
+                {    
+                    playerResponse.GamesGuessed.Add(playerResponse.WordIndex);
+                }
+                return playerResponse;
             }
             
             return null;
