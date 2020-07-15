@@ -19,7 +19,20 @@ namespace Fork
             try
             {
                 var host = await StartSilo();
-                Console.WriteLine("\n\n Press Enter to terminate... \n\n");
+                Console.WriteLine(@"
+                    
+  _    _                                         
+ | |  | |                                        
+ | |__| | __ _ _ __   __ _ _ __ ___   __ _ _ __  
+ |  __  |/ _` | '_ \ / _` | '_ ` _ \ / _` | '_ \ 
+ | |  | | (_| | | | | (_| | | | | | | (_| | | | |
+ |_|  |_|\__,_|_| |_|\__, |_| |_| |_|\__,_|_| |_|
+                      __/ |                      
+                     |___/                       
+
+                    ");
+                Console.WriteLine("The Server!");
+                //Console.WriteLine("\n\n Press Enter to terminate... \n\n");
                 Console.ReadLine();
 
                 await host.StopAsync();
@@ -36,6 +49,7 @@ namespace Fork
         private static async Task<ISiloHost> StartSilo()
         {
             EventHub.ConnectToEventHub().Wait();
+            CosmosDB.ConnectToCosmos().Wait();
             // define the cluster configuration
             var builder = new SiloHostBuilder()
                 .UseLocalhostClustering()

@@ -26,7 +26,6 @@ namespace Fork
             //await eventHubClient.CloseAsync();
         }
 
-        // Uses the event hub client to send 100 messages to the event hub.
         public static async Task SendMessage(Player player)
         {
             try

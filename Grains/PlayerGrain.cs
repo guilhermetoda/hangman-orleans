@@ -1,4 +1,5 @@
 using Orleans;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
@@ -18,6 +19,17 @@ namespace Fork
         {
             this.player = new Player { Key = this.GetPrimaryKey(), Name = "nobody" };
             return base.OnActivateAsync();
+        }
+
+        async Task<bool> IPlayer.GetUserFromDB(string playerName) 
+        {
+            Player responseFromDB = await CosmosDB.GetPlayerFromDatabase(playerName);
+            if (responseFromDB!= null) 
+            {
+                player = responseFromDB;
+                return true;
+            }
+            return false;
         }
 
         Task IPlayer.SetForkGame(IFork game)
@@ -99,9 +111,14 @@ namespace Fork
 
         Task IPlayer.ExitGame() 
         {
-            EventHub.SendMessage(player).Wait();
+            EventHub.SendMessage(player).Wait(3);
             currentGame.RemovePlayerFromGame();
             return Task.CompletedTask;
+        }
+
+        Task<Player> IPlayer.GetPlayerInfo() 
+        {
+            return Task.FromResult(player);
         }
     }
 }

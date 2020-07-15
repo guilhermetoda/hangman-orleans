@@ -55,7 +55,7 @@ namespace Fork
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "dev";
-                    options.ServiceId = "OrleansBasics";
+                    options.ServiceId = "Fork";
                 })
                 .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IFork).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole())
@@ -66,7 +66,7 @@ namespace Fork
             return client;
         }
 
-        private static async Task<IFork> GetEmptyGame(IClusterClient client) 
+        public static async Task<IFork> GetEmptyGame(IClusterClient client) 
         {
             bool gameFound = false;
             int i = 0;
@@ -90,11 +90,7 @@ namespace Fork
 
         private static async Task DoClientWork(IClusterClient client)
         {
-            var friend = await GetEmptyGame(client);
-            var player = client.GetGrain<IPlayer>(Guid.NewGuid());
-            await player.SetForkGame(friend);
-            //var response = await friend.SayHello("Good morning, HelloGrain!");
-            
+
             Console.WriteLine("Welcome to the Hangman game, your goal is to find out which Game is hidden behind the _!");
             Console.WriteLine("Do you want to play? What's your name?");
             
@@ -105,10 +101,26 @@ namespace Fork
                 Console.WriteLine("unfortunately you can't play anonymous, please type your name");
                 name = Console.ReadLine();
             }
-            player.SetName(name).Wait();
 
-            name = player.Name().Result;
-            Console.WriteLine($"Greetings {name}, nice to meet you");
+            
+
+            var player = client.GetGrain<IPlayer>(Guid.NewGuid());
+            
+            bool isRegistered = await player.GetUserFromDB(name);
+            var friend = await GetEmptyGame(client);
+            await player.SetForkGame(friend);
+
+            if (isRegistered) 
+            {    
+                Console.WriteLine($"Hello again {name}, it's good to have you back");
+            }
+            else 
+            {
+                player.SetName(name).Wait();
+                name = player.Name().Result;
+                Console.WriteLine($"Greetings {name}, nice to meet you");
+            }
+            
 
             var response = await player.GetCurrentWord();
             Console.WriteLine($"\n\n{response}\n\n");
@@ -145,4 +157,5 @@ namespace Fork
             await player.ExitGame();
         }
     }
+
 }

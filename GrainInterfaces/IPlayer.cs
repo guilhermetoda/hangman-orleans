@@ -6,6 +6,7 @@ namespace Fork
     public interface IPlayer : IGrainWithGuidKey
     {
         Task SetForkGame(IFork game);
+        Task<bool> GetUserFromDB(string playerName);
 
         Task<string> Name();
         Task SetName(string name);
@@ -21,6 +22,8 @@ namespace Fork
 
         Task<int> GetLives();
         Task<bool> IsPlayerDead();
+
+        Task<Player> GetPlayerInfo();
 
         
     }

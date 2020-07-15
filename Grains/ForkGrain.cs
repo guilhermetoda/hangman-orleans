@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 
 namespace Fork
@@ -17,6 +18,7 @@ namespace Fork
 
         Task IFork.Start(Player player) 
         {
+            Console.WriteLine("A player has connected");
             playerConnected = player;
             random = new System.Random();
             theWord = "";
